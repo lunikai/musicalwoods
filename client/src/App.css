@@ -1,0 +1,31 @@
+.App {
+  text-align: center;
+  padding-top: 20px;
+}
+
+html {
+  /* background-image: url("http://localhost:8000/images/skybg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center top;
+  min-height: 100%;
+  image-rendering: pixelated; */
+  background-color: black;
+  color: white;
+}
+
+h1 {
+  font-family: "Mountains of Christmas", serif;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 40pt;
+  margin-bottom: -10px;
+}
+
+p {
+  font-family: "Josefin Slab", serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 14pt;
+}

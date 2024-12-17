@@ -1,0 +1,15 @@
+{
+  "short_name": "musical woods",
+  "name": "name still kinda tbd tbh",
+  "icons": [
+    {
+      "src": "spirit.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
