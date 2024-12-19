@@ -24,26 +24,36 @@ const storage = multer.diskStorage({
 // file restrictions
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 50000000 },    // accept max file size of abt 50MB (apparently avg wav file is 10MB per minute?)
-  fileFilter: function (req, file, cb) {
+  fileFilter: (req, file, cb) => {
 
     // log file info
     console.log(file);
+    console.log("file size:", req.rawHeaders[req.rawHeaders.indexOf('Content-Length') + 1]);    // afaik axios post requests always have a content-length header field
 
-    // check file type/extension; accept specified audio filetypes only
+    // check file type/extension and size; only accept specified audio filetypes of reasonable length
     const filetype = file.mimetype;
     const fileext = file.originalname.slice(-4);
-    if ((filetype == 'audio/mpeg' 
-        || filetype == 'audio/mp3' 
-        || filetype == 'audio/wav' 
-        || filetype == 'audio/ogg')
-      && (fileext == '.mp3'
-        || fileext == '.wav'
-        || fileext == '.ogg')
-    ) {
-      return cb(null, true);
-    } else {
-      req.fileValidationError = "unsupported file type: file must be audio file with extension .mp3, .wav, or .ogg";
+    const filesize = Number(req.rawHeaders[req.rawHeaders.indexOf('Content-Length') + 1]);
+    // mp3 files
+    if ((filetype === 'audio/mpeg' || filetype === 'audio/mp3') && fileext === '.mp3') {
+      if (filesize < 10 * 1024 * 1024) {    // 10 MB size limit (mp3 files are typically around 1 MB per minute)
+        return cb(null, true);
+      } else {
+        req.fileValidationError = "file too large: please upload a shorter audio file";
+        return cb(null, false, req.fileValidationError);
+      }
+    }
+    // wav files
+    else if (filetype === 'audio/wav' && fileext === '.wav') {
+      if (filesize < 50 * 1024 * 1024) {    // 50 MB size limit (apparently avg wav file is 10MB per minute?)
+        return cb(null, true);
+      } else {
+        req.fileValidationError = "file too large: please upload a shorter audio file";
+        return cb(null, false, req.fileValidationError);
+      }
+    }
+    else {
+      req.fileValidationError = "unsupported file type: file must be audio file with extension .mp3 or .wav";
       return cb(null, false, req.fileValidationError);
     }
   },

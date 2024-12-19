@@ -31,6 +31,8 @@ const uploadFile = (requestCallback, successCallback, failureCallback) => {
       .then((response) => {    // upload completed
         console.log('upload completed');
         console.log(response);
+        console.log('processing upload...')
+        let count = 0;
         // wait here and periodically check for processing completion
         const fileCheckingInterval = setInterval(() => {
           // check if stem files have been created on server
@@ -46,10 +48,18 @@ const uploadFile = (requestCallback, successCallback, failureCallback) => {
             })
             .catch((error) => {
               // console.log(error);
-              console.log('processing upload...');
-            });
 
-        }, 10000);
+              // keep track of time elapsed and set timeout
+              count += 1;
+              if (count >= 20 * 6) {    // timeout duration 20 minutes
+                console.log('processing timeout');
+                clearInterval(fileCheckingInterval);
+                failureCallback();
+              } else {
+                console.log('still processing...');
+              }
+            });
+        }, 10000);    // check every 10 seconds
       })
       .catch((error) => {    // upload failed
         console.log(error);
