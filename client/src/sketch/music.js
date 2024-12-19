@@ -33,11 +33,11 @@ export default class Music {
       this.syncTrack(track);
     }
 
-    // initialize waveform analyzers
-    ///////////////////////////////////////////////////////////////// I THINK U CAN JUST USE ONE SET OF WAVEFORMS FOR ALL TRACKS SINCE NONE OF THEM PLAY AT THE SAME TIME
-    this.waveforms = [];
+    // initialize waveform analyzers (one for each layer)
+    this.waveforms = this.initializeWaveforms();
+    // connect tracks to waveforms
     for (const track of this.tracks) {
-      this.waveforms.push(this.initializeWaveform(track));
+      this.waveformSetup(track);
     }
 
     // initialize effects
@@ -129,14 +129,14 @@ export default class Music {
   // ANALYSIS METHODS
   // initialize a waveform analyzer for each layer
   // waveform values are affected by individual layer (player) volume but not by overall track (players) volume
-  initializeWaveform = (track) => {
-    let waveform = {};
+  initializeWaveforms = () => {
+    let waveforms = {};
     for (const layer of this.LAYERS) {
       let toneWaveform;
       if (layer === this.DRUMS) {
         toneWaveform = new Tone.Analyser({
           type: 'waveform',
-          size: 32,
+          size: 64,
           smoothing: 0.3,
         });
       } else {
@@ -147,11 +147,16 @@ export default class Music {
           smoothing: 0.8,
         });
       }
-			track.player(layer).connect(toneWaveform);
-      waveform[layer] = toneWaveform;
+      waveforms[layer] = toneWaveform;
     }
-    return waveform;
+    return waveforms;
   };
+  // connect track to waveform analyzers
+  waveformSetup = (track) => {
+    for (const layer of this.LAYERS) {
+      track.player(layer).connect(this.waveforms[layer]);
+    }
+  }
   // get root mean square of all elements in given array
   getRootMeanSquare = (values) => {
     let sum_squares = 0;
@@ -162,8 +167,8 @@ export default class Music {
     let rms = mean_squares ** 0.5;
     return rms;
   };
-  getAmplitude = (track, layer) => {
-    let values = this.waveforms[this.tracks.indexOf(track)][layer].getValue();
+  getAmplitude = (layer) => {
+    let values = this.waveforms[layer].getValue();
     return this.getRootMeanSquare(values);
   }
 
@@ -231,8 +236,8 @@ export default class Music {
     // start loading track
     const track = this.loadTrack(folderPath);
 
-    // initialize waveform for new track
-    this.waveforms.push(this.initializeWaveform(track));
+    // connect new track to waveform analyzers
+    this.waveformSetup(track);
 
     // chain effects to track (only need to connect to immediate next node in series)
     track.connect(this.panner);
@@ -330,6 +335,8 @@ export default class Music {
 
 
   // switch between preset tracks
+  ///////////////////////////////////// FOUND AN OCCASIONAL BUG WHERE SWITCHING TRACKS DOES NOT AUTOMATICALLY START PLAYING THE NEXT ONE EVEN THOUGH THE FIRE REMAINS ALIVE; NO IDEA WHERE AND WHY, CANNOT REPRODUCE CONSISTENTLY
+  ////////////////////////////////////////////// seems to be happening after a new track is added??? but not always... idk FIX IT
   switchTrack = async () => {
     console.log('switch track');
     // get new track
@@ -362,7 +369,6 @@ export default class Music {
     for (const track of this.tracks) {
       await this.waitUntilLoaded(track);
     }
-    ///////////////////////////////////////////////////////////////////////////// ERROR IF YOU SWITCH TRACKS WHILE WAITING AND THE NEW ONE HASN'T FINISHED LOADING BY THEN
     await this.water.waitUntilLoaded();    // highly unlikely these haven't loaded by this point though
     await this.crackle.waitUntilLoaded();
     resolve();

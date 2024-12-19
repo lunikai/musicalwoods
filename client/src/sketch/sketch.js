@@ -122,12 +122,12 @@ const sketch = (p) => {
     // draw elements
     //////////////////////////////////////////////////////////////////////TODO: MAP BASS TO SMTH ELSE?
     bg.draw(
-      music.getAmplitude(music.activeTrack, music.OTHER) + music.getAmplitude(music.activeTrack, music.BASS)    // for stars
+      music.getAmplitude(music.OTHER) + music.getAmplitude(music.BASS)    // for stars
     );
     fg.draw(
       music.getVolumePlaying(),    // for campfire
-      music.getAmplitude(music.activeTrack, music.VOCALS),    // for treehouse
-      music.getAmplitude(music.activeTrack, music.DRUMS)    // for bunny
+      music.getAmplitude(music.VOCALS),    // for treehouse
+      music.getAmplitude(music.DRUMS)    // for bunny
     );
     sprite.draw();
 
@@ -137,7 +137,7 @@ const sketch = (p) => {
 
   p.keyPressed = () => {
     console.log("key pressed:", p.key);
-    let volumeControlAmount = 0.04;
+    let volumeControlAmount = 0.03;
     // interaction
     if (p.key === 'e' || p.key === 'E') {
       let fgXPos = fg.getX()
@@ -214,7 +214,7 @@ const sketch = (p) => {
     // // amplitude??
     // if (p.key === 'l') {
     //   console.log(music.waveform1[music.VOCALS].getValue());
-    //   console.log(music.getAmplitude(music.activeTrack, music.VOCALS));
+    //   console.log(music.getAmplitude(music.VOCALS));
     // }
     // panning
     // if (p.key === '9') {

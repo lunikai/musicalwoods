@@ -20,7 +20,8 @@ export default class Sound {
     this.syncSound();
     
     // default volume zero
-    this.setVolume(1e-6);    // if u set it to actual zero then it will become full volume when unmuted
+    this.volume = 0;
+    this.setVolume(0);
   }
 
 
@@ -96,6 +97,7 @@ export default class Sound {
     return this.normalizeVolume(this.decibelToLinear(this.sound.volume.value));
   };
   setVolume = (volume_linear = 1) => {
+    this.volume = volume_linear;    // keep track of volume (even when muted!)
     // block volume changes when muted to prevent unintentional unmuting
     if (!this.isMuted()) {
       volume_linear = Math.max(volume_linear, 1e-6);    // workaround since zero volume sets muted to true
@@ -115,7 +117,8 @@ export default class Sound {
     this.sound.mute = true;
   };
   unmuteSound = () => {
-    this.sound.mute = false;
+    this.sound.mute = false;    // apparently unmuting automatically sets volume to maximum
+    this.setVolume(this.volume);    // so need to reset to intended volume level
   };
   isMuted = () => {
     return this.sound.mute;

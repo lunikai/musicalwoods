@@ -324,7 +324,7 @@ export default class Foreground {
 
   setBunnyTwitch = (amplitude) => {
     /////////////////////////////////////////////////////try keeping twitch active for like 5 frames or smth
-    if (amplitude > 0.10) {
+    if (amplitude > 0.09) {
       this.bunnyTwitch = true;
     } else {
       this.bunnyTwitch = false;
