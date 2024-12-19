@@ -260,8 +260,8 @@ export default class Foreground {
 
   // return x coordinates of left and right edge of campfire & y coordinates of top and bottom edge
   getCampfireBounds = () => {
-    const leftX = this.BLOCK_WIDTH * 7.5;
-    const rightX = this.BLOCK_WIDTH * 8.5;
+    const leftX = this.BLOCK_WIDTH * 7.5 - 4;
+    const rightX = this.BLOCK_WIDTH * 8.5 + 4;
     const topY = this.BLOCK_HEIGHT * 6 + 8;
     const bottomY = this.BLOCK_HEIGHT * 7;
     return [leftX, rightX, topY, bottomY];

@@ -212,7 +212,7 @@ export default class Sprite {
   checkDoorInteraction = ([leftX, rightX, topY, bottomY], fgXPos) => {
     const xDist = this.getXDistanceFg(leftX, rightX, fgXPos);
     const yDist = this.getYDistance(topY, bottomY);
-    if (xDist <= 8 && yDist <= 8) {
+    if (xDist <= 12 && yDist <= 8) {
       return true;
     }
     return false;

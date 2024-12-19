@@ -108,10 +108,14 @@ const sketch = (p) => {
       // decrease volume
       else if (p.key === 'j' || p.key === 'J') {
         adjustVolume(-volumeControlAmount);
+        // change sprite
+        sprite.interact();
       }
       // increase volume
       else if (p.key === 'k' || p.key === 'K') {
         adjustVolume(volumeControlAmount);
+        // change sprite
+        sprite.interact();
       }
     }
 
@@ -132,7 +136,7 @@ const sketch = (p) => {
   };
 
   p.keyPressed = () => {
-    console.log(p.key);
+    console.log("key pressed:", p.key);
     let volumeControlAmount = 0.04;
     // interaction
     if (p.key === 'e' || p.key === 'E') {
@@ -240,8 +244,8 @@ const sketch = (p) => {
     // volume
     let pondXDist = sprite.getXDistanceFg(leftX, rightX, fg.getX());
     let volume = Math.max(0, maxDist - pondXDist) / maxDist;
-    console.log(pondXDist)
-    console.log(volume);
+    // console.log(pondXDist)
+    // console.log(volume);
     music.water.setVolume(volume);
     // panning
     let centerX = (leftX + rightX) / 2;
