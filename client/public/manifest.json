@@ -1,6 +1,6 @@
 {
-  "short_name": "musical woods",
-  "name": "name still kinda tbd tbh",
+  "short_name": "musical world",
+  "name": "it's a musical world",
   "icons": [
     {
       "src": "spirit.png",
@@ -11,5 +11,5 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#000000"
 }

@@ -1,3 +1,3 @@
-# musical woods (title tentative)
+# it's a musical world
 
-an interactive music visualizer
+an interactive music visualizer!
