@@ -3,6 +3,7 @@ import Foreground from "./foreground";
 import Sprite from "./sprite";
 import Music from "./music";
 import uploadFile from "./upload";
+import * as Dialogue from "./dialogue";
 
 const sketch = (p) => {
   // p is a reference to the p5 instance this sketch is attached to
@@ -26,8 +27,6 @@ const sketch = (p) => {
 
   /////// CHECK UPLOAD STATUS??
   let uploadRequested = false;
-  let uploadFinished = false;
-  let uploadError = false;
 
   p.preload = () => {
     // load image elements
@@ -58,6 +57,8 @@ const sketch = (p) => {
 
     p.createCanvas(WIDTH_PIXELS * scale, HEIGHT_PIXELS * scale);
     p.background(0);
+
+    p.showDialogue(Dialogue.INSTRUCTIONS);
   };
 
   p.draw = () => {
@@ -107,13 +108,13 @@ const sketch = (p) => {
       // volume controls (continued press)
       // decrease volume
       else if (p.key === 'j' || p.key === 'J') {
-        adjustVolume(-volumeControlAmount);
+        adjustMusicVolume(-volumeControlAmount);
         // change sprite
         sprite.interact();
       }
       // increase volume
       else if (p.key === 'k' || p.key === 'K') {
-        adjustVolume(volumeControlAmount);
+        adjustMusicVolume(volumeControlAmount);
         // change sprite
         sprite.interact();
       }
@@ -135,101 +136,115 @@ const sketch = (p) => {
     frameCount = (frameCount + 1) % FRAME_LIMIT;
   };
 
+  // called once at the start of a key press
   p.keyPressed = () => {
     console.log("key pressed:", p.key);
     let volumeControlAmount = 0.03;
     // interaction
     if (p.key === 'e' || p.key === 'E') {
-      let fgXPos = fg.getX()
       // interact w/ campfire to play/pause music
-      if (sprite.checkInteractionFg(fg.getCampfireBounds(), fgXPos)) {
-        console.log('campfire');
-        music.playPause();
-        setWaterVolume();
-        setCrackleVolume();
+      if (atCampfire()) {
+        if (music.playPause()) {
+          p.showDialogue(Dialogue.START_CAMPFIRE);
+        } else {
+          p.showDialogue(Dialogue.STOP_CAMPFIRE);
+        }
       }
       // interact w/ bunny => upload custom track (for now)
-      else if (sprite.checkInteractionFg(fg.getBunnyBounds(), fgXPos)) {
-        console.log('bunny');
+      else if (atBunny()) {
         // open upload window (only if nothing else is currently being uploaded/processed)
         if (!uploadRequested) {
-          uploadFile(onUploadRequest, onUploadProcessingSuccess, onUploadFailure);
+          p.showDialogue(Dialogue.BUNNY_UPLOAD_PROMPT);
+          uploadFile(onUploadRequest, onUploadSuccess, onProcessingSuccess, onUploadFailure);
+        } else {
+          // previous upload request is still ongoing
+          p.showDialogue(Dialogue.BUNNY_PROCESSING);
         }
       }
       // interact w/ door to switch music tracks
-      else if (sprite.checkDoorInteraction(fg.getTreehouseDoorBounds(), fgXPos)) {
-        console.log('door');
+      else if (atTreehouseDoor()) {
         music.switchTrack();
+        p.showDialogue(Dialogue.DOOR_DIALOGUE);
+      }
+      // trigger dialogue
+      else if (atTreehouseLeaves() || atTreehouseTrunk()) {
+        p.showDialogue(Dialogue.TREEHOUSE_INTERACT);
+      } else if (atMoon()) {
+        p.showDialogue(Dialogue.MOON_INTERACT);
+      } else if (atPond()) {
+        p.showDialogue(Dialogue.POND_INTERACT);
+      }
+      else {
+        p.showDialogue(Dialogue.INTERACT_NONE);
       }
     }
     // volume controls (initial press)
     // decrease volume
     else if (p.key === 'j' || p.key === 'J') {
-      adjustVolume(-volumeControlAmount);
+      // adjustMusicVolume(-volumeControlAmount);
+      
+      // if interacting w/ campfire, adjust overall track volume
+      if (atCampfire()) {
+        music.adjustVolume(music.activeTrack, -volumeControlAmount);
+        p.showDialogue(Dialogue.CAMPFIRE_VOLUME_DOWN);
+      }
+      // if interacting w/ treehouse, adjust vocals volume
+      else if (atTreehouseLeaves() || atTreehouseTrunk()) {
+        music.adjustLayerVolume(music.activeTrack, music.VOCALS, -volumeControlAmount);
+        p.showDialogue(Dialogue.TREEHOUSE_VOLUME_DOWN);
+      }
+      // if interacting w/ bunny, adjust drums volume
+      else if (atBunny()) {
+        music.adjustLayerVolume(music.activeTrack, music.DRUMS, -volumeControlAmount);
+        p.showDialogue(Dialogue.BUNNY_VOLUME_DOWN);
+      }
+      // if interacting w/ moon, adjust bass & other volume
+      else if (atMoon()) {
+        music.adjustLayerVolume(music.activeTrack, music.BASS, -volumeControlAmount);
+        music.adjustLayerVolume(music.activeTrack, music.OTHER, -volumeControlAmount);
+        p.showDialogue(Dialogue.MOON_VOLUME_DOWN);
+      }
+      else {
+        p.showDialogue(Dialogue.INTERACT_NONE);
+      }
     }
     // increase volume
     else if (p.key === 'k' || p.key === 'K') {
-      adjustVolume(volumeControlAmount);
+      // adjustMusicVolume(volumeControlAmount);
+      
+      // if interacting w/ campfire, adjust overall track volume
+      if (atCampfire()) {
+        music.adjustVolume(music.activeTrack, -volumeControlAmount);
+        p.showDialogue(Dialogue.CAMPFIRE_VOLUME_UP);
+      }
+      // if interacting w/ treehouse, adjust vocals volume
+      else if (atTreehouseLeaves() || atTreehouseTrunk()) {
+        music.adjustLayerVolume(music.activeTrack, music.VOCALS, -volumeControlAmount);
+        p.showDialogue(Dialogue.TREEHOUSE_VOLUME_UP);
+      }
+      // if interacting w/ bunny, adjust drums volume
+      else if (atBunny()) {
+        music.adjustLayerVolume(music.activeTrack, music.DRUMS, -volumeControlAmount);
+        p.showDialogue(Dialogue.BUNNY_VOLUME_UP);
+      }
+      // if interacting w/ moon, adjust bass & other volume
+      else if (atMoon()) {
+        music.adjustLayerVolume(music.activeTrack, music.BASS, -volumeControlAmount);
+        music.adjustLayerVolume(music.activeTrack, music.OTHER, -volumeControlAmount);
+        p.showDialogue(Dialogue.MOON_VOLUME_UP);
+      }
+      else {
+        p.showDialogue(Dialogue.INTERACT_NONE);
+      }
     }
     // skip back and forth
     else if (p.key === '1') {
       music.jumpBack(5);
+      p.showDialogue(Dialogue.TIME_TRAVEL_BACKWARD);
     } else if (p.key === '2') {
       music.jumpForward(5);
+      p.showDialogue(Dialogue.TIME_TRAVEL_FORWARD);
     }
-    //////////////////////////////////////////////////////////////////// TESTINGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
-    // // play/pause current music track
-    // if (p.key === 'p') {
-    //   console.log(music.activeTrack);
-    //   music.playPause();
-    //   setWaterVolume();
-    //   setCrackleVolume();
-    // }
-    // // switch music tracks
-    // else if (p.key === 'o') {
-    //   music.switchTrack();
-    // }
-    // // volume controls (adjust by a larger chunk when first pressed)
-    // let amount = 0.04
-    // if (p.key === 'u') {
-    //   music.adjustLayerVolume(music.activeTrack, music.VOCALS, -amount);
-    // } else if (p.key === 'i') {
-    //   music.adjustLayerVolume(music.activeTrack, music.VOCALS, amount);
-    // }
-    // else if (p.key === 'j') {
-    //   music.adjustVolume(music.activeTrack, -amount);
-    // } else if (p.key === 'k') {
-    //   music.adjustVolume(music.activeTrack, amount);
-    // }
-    // ////// sound effect volume
-    // if (p.key === '1') {
-    //   music.water.adjustVolume(-amount);
-    // } else if (p.key === '2') {
-    //   music.water.adjustVolume(amount);
-    // } else if (p.key === '3') {
-    //   music.crackle.adjustVolume(-amount);
-    // } else if (p.key === '4') {
-    //   music.crackle.adjustVolume(amount);
-    // }
-    // // amplitude??
-    // if (p.key === 'l') {
-    //   console.log(music.waveform1[music.VOCALS].getValue());
-    //   console.log(music.getAmplitude(music.VOCALS));
-    // }
-    // panning
-    // if (p.key === '9') {
-    //   music.panMusic(-1);
-    // } else if (p.key === '0') {
-    //   music.panMusic(1);
-    // }
-    // // chorus (I HEAR NO DIFFERENCE LMAO)
-    // if (p.key === '1') {
-    //   // music.setChorus(Math.max(0, music.chorus.wet.value - 0.1));
-    //   music.setChorus(0);
-    // } else if (p.key === '2') {
-    //   // music.setChorus(Math.min(1, music.chorus.wet.value + 0.1));
-    //   music.setChorus(1);
-    // }
   };
 
   // return current frame count modulo designated limit; note: by default, p5 tries to run at 60 fps
@@ -273,30 +288,73 @@ const sketch = (p) => {
     music.crackle.panSound(pan);
   }
 
-  // adjust volume based on sprite location in world
-  const adjustVolume = (volumeControlAmount) => {
-    let fgXPos = fg.getX();
-    // if interacting w/ campfire, adjust overall track volume
-    if (sprite.checkInteractionFg(fg.getCampfireBounds(), fgXPos)) {
+  // check interactions
+  const atCampfire = () => {
+    if (sprite.checkInteractionFg(fg.getCampfireBounds(), fg.getX())) {
       console.log('campfire');
+      return true;
+    }
+    return false;
+  };
+  const atTreehouseLeaves = () => {
+    if (sprite.checkInteractionFg(fg.getTreehouseLeavesBounds(), fg.getX())) {
+      console.log('leaves');
+      return true;
+    }
+    return false;
+  }
+  const atTreehouseTrunk = () => {
+    if (sprite.checkInteractionFg(fg.getTreehouseDoorBounds(), fg.getX())) {
+      console.log('trunk');
+      return true;
+    }
+    return false;
+  };
+  const atTreehouseDoor = () => {
+    if (sprite.checkDoorInteraction(fg.getTreehouseDoorBounds(), fg.getX())) {
+      console.log('door');
+      return true;
+    }
+    return false;
+  }
+  const atBunny = () => {
+    if (sprite.checkInteractionFg(fg.getBunnyBounds(), fg.getX())) {
+      console.log('bunny');
+      return true;
+    }
+    return false;
+  };
+  const atMoon = () => {
+    if (sprite.checkInteractionBg(bg.getMoonBounds())) {
+      console.log('moon');
+      return true;
+    }
+    return false;
+  };
+  const atPond = () => {
+    if (sprite.checkInteractionFg(fg.getPondBounds(), fg.getX())) {
+      console.log('pond');
+      return true;
+    }
+    return false;
+  };
+
+  // adjust volume based on sprite location in world
+  const adjustMusicVolume = (volumeControlAmount) => {
+    // if interacting w/ campfire, adjust overall track volume
+    if (atCampfire()) {
       music.adjustVolume(music.activeTrack, volumeControlAmount);
     }
     // if interacting w/ treehouse, adjust vocals volume
-    else if (sprite.checkInteractionFg(fg.getTreehouseLeavesBounds(), fgXPos)) {
-      console.log('leaves');
-      music.adjustLayerVolume(music.activeTrack, music.VOCALS, volumeControlAmount);
-    } else if (sprite.checkInteractionFg(fg.getTreehouseDoorBounds(), fgXPos)) {
-      console.log('door');
+    else if (atTreehouseLeaves() || atTreehouseTrunk()) {
       music.adjustLayerVolume(music.activeTrack, music.VOCALS, volumeControlAmount);
     }
     // if interacting w/ bunny, adjust drums volume
-    else if (sprite.checkInteractionFg(fg.getBunnyBounds(), fgXPos)) {
-      console.log('bunny');
+    else if (atBunny()) {
       music.adjustLayerVolume(music.activeTrack, music.DRUMS, volumeControlAmount);
     }
     // if interacting w/ moon, adjust bass & other volume
-    else if (sprite.checkInteractionBg(bg.getMoonBounds())) {
-      console.log('moon');
+    else if (atMoon()) {
       music.adjustLayerVolume(music.activeTrack, music.BASS, volumeControlAmount);
       music.adjustLayerVolume(music.activeTrack, music.OTHER, volumeControlAmount);
     }
@@ -307,24 +365,34 @@ const sketch = (p) => {
   const onUploadRequest = () => {
     console.log('upload started');
     uploadRequested = true;
-    uploadFinished = false;
-    uploadError = false;
     fg.bunnyColor = fg.BUNNY_GREEN;
   };
+  const onUploadSuccess = () => {
+    // console.log('upload finished');
+    p.showDialogue(Dialogue.BUNNY_PROCESSING);
+  };
   // gets passed path to folder containing stems
-  const onUploadProcessingSuccess = async (folderPath) => {
-    console.log('upload and processing finished');
+  const onProcessingSuccess = async (folderPath) => {
+    // console.log('upload processing finished');
     // load uploaded track before updating status
     await music.addNewTrack(folderPath);
-    uploadFinished = true;
     uploadRequested = false;
     fg.bunnyColor = fg.BUNNY_BLUE;
+    p.showDialogue(Dialogue.BUNNY_SUCCESS);
   };
-  const onUploadFailure = () => {
+  const onUploadFailure = (errorType) => {
     console.log('upload failed');
-    uploadError = true;
     uploadRequested = false;
     fg.bunnyColor = fg.BUNNY_RED;
+    if (errorType === 'filetype') {
+      p.showDialogue(Dialogue.BUNNY_WRONG_FILETYPE);
+    } else if (errorType === 'filesize') {
+      p.showDialogue(Dialogue.BUNNY_FILE_TOO_BIG);
+    } else if (errorType === 'timeout') {    // processing timeout
+      p.showDialogue(Dialogue.BUNNY_TIMEOUT);
+    } else {
+      p.showDialogue(Dialogue.BUNNY_UNKNOWN_ERROR)
+    }
   };
 };
 

@@ -358,7 +358,7 @@ export default class Music {
 
     // play new track from beginning
     this.timestamp = 0;
-    this.play();
+    this.play();    //////////////////////////////////////////// maybe make it play only if it was already playing before?
   };
 
 
@@ -398,12 +398,14 @@ export default class Music {
     this.muteTrack(this.activeTrack);
     this.crackle.muteSound();
   };
-  // play/pause toggle
+  // play/pause toggle; return true for play and false for pause
   playPause = () => {
     if (this.isMuted(this.activeTrack)) {
       this.play();
+      return true;
     } else {
       this.pause();
+      return false;
     }
   };
   // jump to beginning of track

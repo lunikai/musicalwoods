@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import sketch from "./sketch";
 import "./canvas.css"
 import API_BASE from "../paths/api";
@@ -7,6 +7,32 @@ import * as p5 from "p5";    // p5 imports must be in this exact order to work p
 // await import("p5/lib/addons/p5.sound");    // idk why but it does not work without await so DO NOT TOUCH
 
 const Canvas = () => {
+  const [dialogue, setDialogue] = useState("");
+  let intervalID;
+  // type out dialogue word by word
+  const showDialogue = (text) => {
+    // add delay at beginning
+    setTimeout(() => {
+      const words = text.split(' ');
+      let i = 0;
+      let write = words[i];
+      // stop previous typing interval
+      clearInterval(intervalID);
+      intervalID = setInterval(() => {
+        // type current dialogue
+        setDialogue(write);
+        i += 1;
+        if (i === words.length) {
+          // all words have been written
+          clearInterval(intervalID);
+        } else {
+          // add next word
+          write += " " + words[i];
+        }
+      }, 70);
+      // setDialogue(text);
+    }, 200);
+  };
 
   // hold a reference to DOM node where p5 instance will be placed
   let myRef = useRef();
@@ -14,6 +40,7 @@ const Canvas = () => {
   useEffect(() => {
     // create p5 instance with sketch as content and referenced node as parent
     let myP5 = new p5(sketch, myRef.current);
+    myP5.showDialogue = showDialogue;    // allow access to showDialogue from within sketch
 
     // remove p5 instance when node is destroyed
     // doesn't fix canvas duplication issue due to double useeffect call in strictmode though... apparently deletes everything but the canvas???
@@ -31,6 +58,9 @@ const Canvas = () => {
         <img id="p5_loading" src={API_BASE + 'images/treehouse.png'} alt="loadinggg..." width="230px" />
         {/* when DOM node for this div is created, myRef.current will hold a reference to this node */}
         <div ref={myRef} />
+      </div>
+      <div className="dialogue">
+        <p>{dialogue}</p>
       </div>
     </>
   )

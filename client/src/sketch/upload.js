@@ -4,7 +4,7 @@ import UPLOADS from '../paths/user-uploads';
 
 // trigger file upload sequence
 /////////////// also add file validation at both client and server!!! STILL NEED TO DO CLIENT SIDEEEE
-const uploadFile = (requestCallback, successCallback, failureCallback) => {
+const uploadFile = (requestCallback, uploadSuccessCallback, processingSuccessCallback, failureCallback) => {
 
   // create file input element
   let input = document.createElement('input');
@@ -31,6 +31,7 @@ const uploadFile = (requestCallback, successCallback, failureCallback) => {
       .then((response) => {    // upload completed
         console.log('upload completed');
         console.log(response);
+        uploadSuccessCallback();
         console.log('processing upload...')
         let count = 0;
         // wait here and periodically check for processing completion
@@ -43,8 +44,8 @@ const uploadFile = (requestCallback, successCallback, failureCallback) => {
               console.log('processing complete');
               clearInterval(fileCheckingInterval);
               
-              // callback with path to uploaded files
-              successCallback(filePath);
+              // callback with path to generated files
+              processingSuccessCallback(filePath);
             })
             .catch((error) => {
               // console.log(error);
@@ -54,7 +55,7 @@ const uploadFile = (requestCallback, successCallback, failureCallback) => {
               if (count >= 20 * 6) {    // timeout duration 20 minutes
                 console.log('processing timeout');
                 clearInterval(fileCheckingInterval);
-                failureCallback();
+                failureCallback('timeout');
               } else {
                 console.log('still processing...');
               }
@@ -62,8 +63,16 @@ const uploadFile = (requestCallback, successCallback, failureCallback) => {
         }, 10000);    // check every 10 seconds
       })
       .catch((error) => {    // upload failed
-        console.log(error);
-        failureCallback();
+        // console.log(error);
+        const errorMsg = error.response.data;
+        console.log(errorMsg);
+        if (errorMsg.includes('unsupported file type')) {
+          failureCallback('filetype');
+        } else if (errorMsg.includes('file too large')) {
+          failureCallback('filesize');
+        } else {
+          failureCallback('unknown');
+        }
       });
   }
 
