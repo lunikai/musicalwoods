@@ -39,7 +39,7 @@ const uploadFile = (requestCallback, uploadSuccessCallback, processingSuccessCal
           // check if stem files have been created on server
           let filePath = UPLOADS + response.data.stemFolderPath;
           axios
-            .get(filePath + 'vocals.wav')    // kinda assuming vocals is the last file to be created since it comes last alphabetically...
+            .get(filePath + 'vocals.mp3')    // kinda assuming vocals is the last file to be created since it comes last alphabetically...
             .then((response) => {
               console.log('processing complete');
               clearInterval(fileCheckingInterval);

@@ -16,7 +16,7 @@ abs_file_path = abs_folder_path + '/' + filename    # ... /server/uploads/[uploa
 # stems will be saved to abs_folder_path/htdemucs_6s/(filename minus extension)
 # save as mp3 instead of wav to reduce ram usage on client side
 # demucs.separate.main(["-n", "htdemucs_6s", "-o", abs_folder_path, abs_file_path])
-demucs.separate.main(["-n", "htdemucs", "-d", "cpu", "-o", abs_folder_path, abs_file_path])
+demucs.separate.main(["-n", "htdemucs", "--mp3", "-d", "cpu", "-o", abs_folder_path, abs_file_path])
 
 
 # flush all prior output before final print stmt just in case, to ensure that it gets read & stored separately

@@ -74,7 +74,7 @@ export default class Music {
 
     // add track layers
     for (const layer of this.LAYERS) {
-      track.add(layer, folderPath + layer + '.wav');
+      track.add(layer, folderPath + layer + '.mp3');
     }
 
     // loop track
