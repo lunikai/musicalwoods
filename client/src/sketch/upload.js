@@ -38,8 +38,9 @@ const uploadFile = (requestCallback, uploadSuccessCallback, processingSuccessCal
         const fileCheckingInterval = setInterval(() => {
           // check if stem files have been created on server
           let filePath = UPLOADS + response.data.stemFolderPath;
+          let timestamp = new Date().getTime();    // need this to get around browser caching
           axios
-            .get(filePath + 'vocals.mp3')    // kinda assuming vocals is the last file to be created since it comes last alphabetically...
+            .get(filePath + 'vocals.mp3?timestamp=' + timestamp)    // kinda assuming vocals is the last file to be created since it comes last alphabetically...
             .then((response) => {
               console.log('processing complete');
               clearInterval(fileCheckingInterval);
