@@ -24,9 +24,9 @@ export const MOON_INTERACT = "stars are twinkling in the sky...";
 export const MOON_VOLUME_UP = "the moonlight casts a silvery shine on your face.";
 export const MOON_VOLUME_DOWN = "a cloud drifts over the moon.";
 
-export const POND_INTERACT = "you hear the pond water flowing and stop to wonder where it's headed.";
+export const POND_INTERACT = "you hear water flowing in the pond and stop to wonder where it's headed.";
 
-export const INTERACT_NONE = "nothing of interest happened.";
+export const INTERACT_NONE = "you blink, but nothing of interest happens.";
 
 export const TIME_TRAVEL_BACKWARD = "you feel a strange sense of déjà vu...";
 export const TIME_TRAVEL_FORWARD = "for some reason, you get the impression that time has moved ahead without you...";

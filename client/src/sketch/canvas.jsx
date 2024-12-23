@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import sketch from "./sketch";
 import "./canvas.css"
-import API_BASE from "../paths/api";
 import * as p5 from "p5";    // p5 imports must be in this exact order to work properly
 // window.p5 = p5;    // need to define p5 in global scope in order to use p5.sound addon
 // await import("p5/lib/addons/p5.sound");    // idk why but it does not work without await so DO NOT TOUCH
@@ -55,7 +54,15 @@ const Canvas = () => {
     <>
       <div className="canvas">
         {/* element w/ id p5_loading will replace default loading screen */}
-        <img id="p5_loading" src={API_BASE + 'images/treehouse.png'} alt="loadinggg..." width="230px" />
+        <div id="p5_loading">
+          <div className="spirit" onContextMenu={(e)=> e.preventDefault()}>
+            <img id="rm" src="spirit_normal/rightmove.png" alt="" draggable='false' />
+            <img id="r" src="spirit_normal/right.png" alt="" draggable='false' />
+            <img id="l" src="spirit_normal/left.png" alt="" draggable='false' />
+            <img id="lm" src="spirit_normal/leftmove.png" alt="" draggable='false' />
+          </div>
+          <p className="loading">loading...</p>
+        </div>
         {/* when DOM node for this div is created, myRef.current will hold a reference to this node */}
         <div ref={myRef} />
       </div>

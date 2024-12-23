@@ -1,4 +1,6 @@
 .App {
+  display: flex;
+  justify-content: center;
   text-align: center;
   padding-top: 15px;
 }
@@ -11,7 +13,7 @@ html {
   min-height: 100%;
   image-rendering: pixelated; */
   background-color: black;
-  color: white;
+  color: rgb(224, 213, 247);
 }
 
 h1 {
@@ -20,6 +22,7 @@ h1 {
   font-style: normal;
   font-size: 40pt;
   margin-bottom: -10px;
+  color: ghostwhite;
 }
 
 p {
@@ -28,4 +31,40 @@ p {
   font-weight: 400;
   font-style: normal;
   font-size: 14pt;
+}
+
+::-moz-selection {
+  color: ghostwhite;
+  background: rgba(221, 160, 221, 0.6);
+}
+
+::selection {
+  color: ghostwhite;
+  background: rgba(221, 160, 221, 0.6);
+}
+
+/* scrollbar */
+/* width */
+::-webkit-scrollbar {
+  width: 18px;
+}
+/* track */
+::-webkit-scrollbar-track {
+  background: solid transparent;
+}
+/* handle */
+::-webkit-scrollbar-thumb {
+  background: rgba(224, 213, 247, 0.4);
+  width: 10px;
+  border: 6px solid transparent;
+  border-radius: 10px;
+  background-clip: content-box;
+}
+/* handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(224, 213, 247, 0.6);
+  width: 10px;
+  border: 6px solid transparent;
+  border-radius: 10px;
+  background-clip: content-box;
 }
